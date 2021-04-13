@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:compression="http://www.mulesoft.org/schema/mule/compression" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="901fb637-1edc-4b94-8cfb-51ff9705fd82" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="us-statewise-covid-cases-impl" doc:id="7f186b9a-5eb9-44d4-9621-fd5c4ca20c9d" >
+		<http:listener doc:name="Listener" doc:id="8b7af6fe-f77c-44cc-ab4b-0f4020528828" config-ref="HTTP_Listener_config" path="/api/test"/>
+		<ee:transform doc:name="Transform Message" doc:id="d7376cda-b8b6-4078-b931-d5d79ea69df3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+readUrl("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "application/csv")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<compression:compress doc:name="Compress" doc:id="856b7f02-d683-4a7e-96c7-93428fdb3918" >
+			<compression:compressor >
+				<compression:zip-compressor />
+			</compression:compressor>
+		</compression:compress>
+		<logger level="INFO" doc:name="Logger" doc:id="5b331623-9e33-4868-aa28-afa43bd0bea9" />
+	</flow>
+</mule>
